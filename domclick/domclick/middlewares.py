@@ -63,6 +63,8 @@ class DomclickDownloaderMiddleware:
     def __init__(self):
         options = ChromeOptions()
         options.headless = False
+        options.use_subprocess = False
+        options.detach = True
         self.driver = Chrome(options=options)
 
 

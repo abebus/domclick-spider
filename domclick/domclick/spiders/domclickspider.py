@@ -4,10 +4,10 @@
 
 import scrapy
 from domclick.items import DomclickItem, Details
-from selenium.webdriver import Firefox
-from selenium.webdriver.common.by import By
+from undetected_chromedriver import Chrome
 from domclick.http import SeleniumRequest
 from urllib.parse import urlencode
+import logging
 
 API_KEY = '3c58cd96-1010-4ea4-96da-2ca75ed5d254'
 DOMCLICK_URL = 'https://kazan.domclick.ru/search?deal_type=sale&category=living&offer_type=layout&offer_type=flat&aids=1967&rooms=1&offset=0'
@@ -20,7 +20,7 @@ class DomclickspiderSpider(scrapy.Spider):
     name = "domclickspider"
 
     def __init__(self):
-        self.driver: Firefox
+        self.driver: Chrome
         self.driver = None
 
     def start_requests(self):
@@ -30,6 +30,8 @@ class DomclickspiderSpider(scrapy.Spider):
         yield req
 
     def parse_details(self, response):
+        if self.driver is None:
+            self.driver = response.meta['driver']
         show_telephone = response.css('div[class="telephony_developerContactButton"]')
         button = show_telephone.css('button')
         self.driver.execute_script("arguments[0].click();", button)
@@ -39,8 +41,10 @@ class DomclickspiderSpider(scrapy.Spider):
         yield Details(number=number, description=description, realtor=realtor)
 
     def parse_main(self, response):
-
+        if self.driver is None:
+            self.driver = response.meta['driver']
         for flat in response.css('div[data-test="product-snippet"]'):
+            logging.info('flats found')
             a_tag = flat.css('div[data-test="product-snippet-property-offer"]::text').get()
             url = a_tag.attrib['href'].get()
             rooms, area, floor = a_tag.css('span::text').getall()
@@ -51,3 +55,5 @@ class DomclickspiderSpider(scrapy.Spider):
             yield DomclickItem(url=url, name=name, price=price, page=int(page), details=detailed_page)
             next_page_button = response.css('div[data-e2e-id="paginate-next-btn"]')
             self.driver.execute_script("arguments[0].click();", next_page_button)
+        else:
+            logging.info('NO flats found')
