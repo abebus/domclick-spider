@@ -5,10 +5,10 @@
 
 from scrapy import signals
 from scrapy.http import HtmlResponse
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
 from undetected_chromedriver import Chrome, ChromeOptions
-
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 class DomclickSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -65,6 +65,12 @@ class DomclickDownloaderMiddleware:
         options.headless = False
         options.use_subprocess = False
         options.detach = True
+        options.add_argument("--no-default-browser-check")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-first-run")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-infobars")
         self.driver = Chrome(options=options)
 
 
@@ -81,14 +87,13 @@ class DomclickDownloaderMiddleware:
                 }
             )
 
-        body = str.encode(self.driver.page_source)
 
         # Expose the driver via the "meta" attribute
         request.meta.update({'driver': self.driver})
 
         return HtmlResponse(
             self.driver.current_url,
-            body=body,
+            body=self.driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML"),
             encoding='utf-8',
             request=request
         )
