@@ -31,7 +31,7 @@ DOWNLOAD_DELAY = 3 # типа мы человек
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = False # ни на что не влияет
+COOKIES_ENABLED = True # ни на что не влияет
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False

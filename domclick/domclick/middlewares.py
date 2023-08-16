@@ -7,6 +7,7 @@ from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
+from undetected_chromedriver import Chrome, ChromeOptions
 
 class DomclickSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -60,9 +61,9 @@ class DomclickDownloaderMiddleware:
     """Scrapy middleware handling the requests using selenium"""
 
     def __init__(self):
-        options = Options()
+        options = ChromeOptions()
         options.headless = False
-        self.driver = Firefox(options=options)
+        self.driver = Chrome(options=options)
 
 
     def process_request(self, request, spider):
